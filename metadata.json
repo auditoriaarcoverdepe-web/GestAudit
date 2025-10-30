@@ -1,0 +1,5 @@
+{
+  "name": "Aplicativo Pessoal de Gestão de Auditorias",
+  "description": "Um aplicativo pessoal e simples para gestão de auditorias, permitindo o planejamento, acompanhamento e controle de auditorias, registro de achados e recomendações, e monitoramento de prazos e status.",
+  "requestFramePermissions": []
+}

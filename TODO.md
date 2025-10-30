@@ -1,0 +1,6 @@
+- [x] Delete components/AIReportAssistant.tsx
+- [x] Remove AIReportAssistant import from App.tsx
+- [x] Remove 'aiReportAssistant' from View type in App.tsx
+- [x] Remove 'aiReportAssistant' case from renderContent in App.tsx
+- [x] Remove NavItem for "Assistente IA" in App.tsx
+- [x] Test the app to ensure no errors
