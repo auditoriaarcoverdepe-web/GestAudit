@@ -22,8 +22,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cinza-claro">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-[url('/background_login.jpg')] bg-cover bg-center bg-fixed">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-2xl">
         <div className="text-center">
           <img src="/Logo1.png" alt="Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-azul-escuro">GestAudit</h1>
