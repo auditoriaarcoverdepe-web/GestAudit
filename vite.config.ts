@@ -18,6 +18,13 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      // Adiciona @google/genai como external para evitar que o Vite tente resolvê-lo localmente,
+      // já que ele é carregado via importmap/CDN.
+      build: {
+        rollupOptions: {
+          external: ['@google/genai'],
+        },
+      },
     };
 });
