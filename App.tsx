@@ -18,6 +18,7 @@ import InstitutionSelection from './components/InstitutionSelection';
 import AuditStageForm from './components/AuditStageForm';
 import RiskMatrix from './components/RiskMatrix';
 import RiskForm from './components/RiskForm';
+import { exportData } from './supabase-database';
 
 
 type View = 'dashboard' | 'plan' | 'findings' | 'recommendations' | 'reports' | 'settings' | 'riskMatrix' | 'aiAssistant';
@@ -315,7 +316,7 @@ const App: React.FC = () => {
       case 'aiAssistant':
         return <AIAssistant />;
       case 'settings':
-  return <Settings profile={profile} onProfileChange={handleProfileChange} />;
+        return <Settings profile={profile} onProfileChange={handleProfileChange} onExportData={exportData} />;
 
       default:
         return <Dashboard audits={currentAudits} findings={currentFindings} recommendations={currentRecommendations} />;
