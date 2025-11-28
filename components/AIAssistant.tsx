@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { SparklesIcon } from './Icons';
 
 // Inicializa o cliente Gemini usando a chave API definida em vite.config.ts
+// O tipo GoogleGenAI é importado do módulo '@google/genai' que é resolvido via importmap.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const AIAssistant: React.FC = () => {
