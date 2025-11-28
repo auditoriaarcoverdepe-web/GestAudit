@@ -294,23 +294,23 @@ export const saveAudit = async (auditData: Omit<Audit, 'id'> | Audit, institutio
     const { data } = await supabase.from('audits').select('*');
     return (data || []).map(row => ({
       id: row.id,
-      institutionId: row.institutionId,
+      institutionId: row.institutionid,
       year: row.year,
-      auditNumber: row.auditNumber,
+      auditNumber: row.auditnumber,
       title: row.title,
-      auditedSector: row.auditedSector,
-      sectorResponsible: row.sectorResponsible,
+      auditedSector: row.auditedsector,
+      sectorResponsible: row.sectorresponsible,
       type: row.type as AuditType,
-      plannedStartDate: row.plannedStartDate,
-      plannedEndDate: row.plannedEndDate,
-      actualStartDate: row.actualStartDate || undefined,
-      actualEndDate: row.actualEndDate || undefined,
+      plannedStartDate: row.plannedstartdate,
+      plannedEndDate: row.plannedenddate,
+      actualStartDate: row.actualstartdate || undefined,
+      actualEndDate: row.actualenddate || undefined,
       status: row.status as AuditStatus,
       priority: row.priority as Priority,
       objective: row.objective || undefined,
       scope: row.scope || undefined,
       criteria: row.criteria || undefined,
-      auditorNotes: row.auditorNotes || undefined,
+      auditorNotes: row.auditornotes || undefined,
     }));
   } catch (error) {
     console.error('Error saving audit:', error);
@@ -543,13 +543,13 @@ export const deleteRecommendation = async (recId: string): Promise<Recommendatio
     const { data } = await supabase.from('recommendations').select('*');
     return (data || []).map(row => ({
       id: row.id,
-      findingId: row.findingId,
-      recommendationCode: row.recommendationCode,
+      findingId: row.findingid,
+      recommendationCode: row.recommendationcode,
       description: row.description,
-      implementationResponsible: row.implementationResponsible,
+      implementationResponsible: row.implementationresponsible,
       deadline: row.deadline,
       status: row.status as RecommendationStatus,
-      verificationDate: row.verificationDate || undefined,
+      verificationDate: row.verificationdate || undefined,
     }));
   } catch (error) {
     console.error('Error deleting recommendation:', error);
@@ -628,12 +628,12 @@ export const saveAuditStage = async (stageData: Omit<AuditStage, 'id'> | AuditSt
 
     const result = (data || []).map(row => ({
       id: row.id,
-      auditId: row.auditId,
+      auditId: row.auditid,
       name: row.name,
-      plannedStartDate: row.plannedStartDate,
-      plannedEndDate: row.plannedEndDate,
-      actualStartDate: row.actualStartDate || undefined,
-      actualEndDate: row.actualEndDate || undefined,
+      plannedStartDate: row.plannedstartdate,
+      plannedEndDate: row.plannedenddate,
+      actualStartDate: row.actualstartdate || undefined,
+      actualEndDate: row.actualenddate || undefined,
       status: row.status as AuditStageStatus,
       responsible: row.responsible || undefined,
       notes: row.notes || undefined,
@@ -659,12 +659,12 @@ export const deleteAuditStage = async (stageId: string): Promise<AuditStage[]> =
     const { data } = await supabase.from('audit_stages').select('*');
     return (data || []).map(row => ({
       id: row.id,
-      auditId: row.auditId,
+      auditId: row.auditid,
       name: row.name,
-      plannedStartDate: row.plannedStartDate,
-      plannedEndDate: row.plannedEndDate,
-      actualStartDate: row.actualStartDate || undefined,
-      actualEndDate: row.actualEndDate || undefined,
+      plannedStartDate: row.plannedstartdate,
+      plannedEndDate: row.plannedenddate,
+      actualStartDate: row.actualstartdate || undefined,
+      actualEndDate: row.actualenddate || undefined,
       status: row.status as AuditStageStatus,
       responsible: row.responsible || undefined,
       notes: row.notes || undefined,
@@ -786,11 +786,11 @@ export const deleteRisk = async (riskId: string): Promise<Risk[]> => {
     const { data } = await supabase.from('risks').select('*');
     return (data || []).map(row => ({
       id: row.id,
-      auditId: row.auditId,
+      auditId: row.auditid,
       description: row.description,
       impact: row.impact as ImpactLevel,
       probability: row.probability as ProbabilityLevel,
-      riskLevel: row.riskLevel as RiskLevel,
+      riskLevel: row.risklevel as RiskLevel,
       controls: row.controls,
     }));
   } catch (error) {
@@ -809,123 +809,4 @@ export const exportData = async () => {
     link.href = jsonString;
     link.download = "gestaudit_backup.json";
     link.click();
-};
-
-// Migration function to sync local data to Supabase
-export const migrateLocalDataToSupabase = async () => {
-  try {
-    // Import the old database functions temporarily
-    const { loadAllData: loadLocalData } = await import('./database');
-
-    // Load data from local SQLite
-    const localData = loadLocalData();
-
-    // Insert institutions
-    for (const institution of localData.institutions) {
-      await supabase.from('institutions').upsert({
-        id: institution.id,
-        municipalityname: institution.municipalityName,
-        type: institution.type,
-        cnpj: institution.cnpj,
-      });
-    }
-
-    // Insert audits
-    for (const audit of localData.audits) {
-      await supabase.from('audits').upsert({
-        id: audit.id,
-        institutionId: audit.institutionId,
-        year: audit.year,
-        auditNumber: audit.auditNumber,
-        title: audit.title,
-        auditedSector: audit.auditedSector,
-        sectorResponsible: audit.sectorResponsible,
-        type: audit.type,
-        plannedStartDate: audit.plannedStartDate,
-        plannedEndDate: audit.plannedEndDate,
-        actualStartDate: audit.actualStartDate || null,
-        actualEndDate: audit.actualEndDate || null,
-        status: audit.status,
-        priority: audit.priority,
-        objective: audit.objective || null,
-        scope: audit.scope || null,
-        criteria: audit.criteria || null,
-        auditorNotes: audit.auditorNotes || null,
-      });
-    }
-
-    // Insert findings
-    for (const finding of localData.findings) {
-      await supabase.from('findings').upsert({
-        id: finding.id,
-        auditId: finding.auditId,
-        findingCode: finding.findingCode,
-        summary: finding.summary,
-        evidence: finding.evidence,
-        violatedCriteria: finding.violatedCriteria,
-        cause: finding.cause,
-        effect: finding.effect,
-        classification: finding.classification,
-        status: finding.status,
-        attachments: finding.attachments || [],
-      });
-    }
-
-    // Insert recommendations
-    for (const recommendation of localData.recommendations) {
-      await supabase.from('recommendations').upsert({
-        id: recommendation.id,
-        findingId: recommendation.findingId,
-        recommendationCode: recommendation.recommendationCode,
-        description: recommendation.description,
-        implementationResponsible: recommendation.implementationResponsible,
-        deadline: recommendation.deadline,
-        status: recommendation.status,
-        verificationDate: recommendation.verificationDate || null,
-      });
-    }
-
-    // Insert audit stages
-    for (const stage of localData.auditStages) {
-      await supabase.from('audit_stages').upsert({
-        id: stage.id,
-        auditId: stage.auditId,
-        name: stage.name,
-        plannedStartDate: stage.plannedStartDate,
-        plannedEndDate: stage.plannedEndDate,
-        actualStartDate: stage.actualStartDate || null,
-        actualEndDate: stage.actualEndDate || null,
-        status: stage.status,
-        responsible: stage.responsible || null,
-        notes: stage.notes || null,
-      });
-    }
-
-    // Insert risks
-    for (const risk of localData.risks) {
-      await supabase.from('risks').upsert({
-        id: risk.id,
-        auditId: risk.auditId,
-        description: risk.description,
-        impact: risk.impact,
-        probability: risk.probability,
-        riskLevel: risk.riskLevel,
-        controls: risk.controls,
-      });
-    }
-
-    // Insert profile
-    await supabase.from('profile').upsert({
-      id: 1,
-      name: localData.profile.name,
-      role: localData.profile.role,
-      email: localData.profile.email,
-      signature: localData.profile.signature,
-    });
-
-    console.log('Data migration completed successfully!');
-  } catch (error) {
-    console.error('Error during data migration:', error);
-    throw error;
-  }
 };
