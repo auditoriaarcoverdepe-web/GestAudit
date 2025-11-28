@@ -11,7 +11,6 @@ import RecommendationForm from './components/RecommendationForm';
 import FindingsList from './components/FindingsList';
 import RecommendationsList from './components/RecommendationsList';
 import Reports from './components/Reports';
-import AIAssistant from './components/AIAssistant';
 import Settings from './components/Settings';
 import Login from './components/Login';
 import InstitutionSelection from './components/InstitutionSelection';
@@ -21,7 +20,7 @@ import RiskForm from './components/RiskForm';
 import { exportData } from './supabase-database';
 
 
-type View = 'dashboard' | 'plan' | 'findings' | 'recommendations' | 'reports' | 'settings' | 'riskMatrix' | 'aiAssistant';
+type View = 'dashboard' | 'plan' | 'findings' | 'recommendations' | 'reports' | 'settings' | 'riskMatrix';
 
 const App: React.FC = () => {
   const [audits, setAudits] = useState<Audit[]>([]);
@@ -313,8 +312,6 @@ const App: React.FC = () => {
         return <RecommendationsList recommendations={currentRecommendations} findings={currentFindings} audits={currentAudits} onSelectAudit={handleSelectAudit} onNewRecommendation={handleNewRecommendation} />;
       case 'reports':
         return <Reports audits={currentAudits} findings={currentFindings} recommendations={currentRecommendations} risks={currentRisks} />;
-      case 'aiAssistant':
-        return <AIAssistant />;
       case 'settings':
         return <Settings profile={profile} onProfileChange={handleProfileChange} onExportData={exportData} />;
 
@@ -354,7 +351,6 @@ const App: React.FC = () => {
           <NavItem view="findings" label="Banco de Achados" icon={<DocumentTextIcon className="w-6 h-6" />} />
           <NavItem view="recommendations" label="Plano de Ação" icon={<DocumentTextIcon className="w-6 h-6" />} />
           <NavItem view="reports" label="Relatórios" icon={<ChartPieIcon className="w-6 h-6" />} />
-          <NavItem view="aiAssistant" label="Assistente IA" icon={<SparklesIcon className="w-6 h-6" />} />
 
           <NavItem view="settings" label="Configurações" icon={<CogIcon className="w-6 h-6" />} />
         </nav>

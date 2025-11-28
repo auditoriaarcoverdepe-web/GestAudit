@@ -4,3 +4,5 @@
 - [x] Remove 'aiReportAssistant' case from renderContent in App.tsx
 - [x] Remove NavItem for "Assistente IA" in App.tsx
 - [x] Test the app to ensure no errors
+- [x] Remove AIAssistant.tsx
+- [x] Remove all AI references from App.tsx and vite.config.ts

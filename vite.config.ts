@@ -11,19 +11,17 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        // Removed AI-related environment variables
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
       },
-      // Adiciona @google/genai como external para evitar que o Vite tente resolvê-lo localmente,
-      // já que ele é carregado via importmap/CDN.
+      // Removed AI-related build configuration
       build: {
         rollupOptions: {
-          external: ['@google/genai'],
+          external: [],
         },
       },
     };
