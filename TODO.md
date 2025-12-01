@@ -6,3 +6,4 @@
 - [x] Test the app to ensure no errors
 - [x] Remove AIAssistant.tsx
 - [x] Remove all AI references from App.tsx and vite.config.ts
+- [x] Remove AIReportAssistant.tsx

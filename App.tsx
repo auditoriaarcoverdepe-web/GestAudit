@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Audit, Finding, Recommendation, AuditorProfile, Institution, InstitutionType, AuditStage, Risk } from './types';
 import * as db from './supabase-database';
-import { HomeIcon, CalendarIcon, DocumentTextIcon, ChartPieIcon, CogIcon, LogoutIcon, ClipboardListIcon, SparklesIcon } from './components/Icons';
+import { HomeIcon, CalendarIcon, DocumentTextIcon, ChartPieIcon, CogIcon, LogoutIcon, ClipboardListIcon } from './components/Icons';
 import Dashboard from './components/Dashboard';
 import AuditPlan from './components/AuditPlan';
 import AuditDetail from './components/AuditDetail';
@@ -121,6 +121,15 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    
+    // FIX: If we were editing an audit, update the selectedAudit state to reflect changes immediately.
+    if ('id' in auditData && selectedAudit && auditData.id === selectedAudit.id) {
+        const updatedAudit = appData.audits.find(a => a.id === auditData.id);
+        if (updatedAudit) {
+            setSelectedAudit(updatedAudit);
+        }
+    }
+
     setIsAuditFormOpen(false);
     setEditingAudit(undefined);
   };
