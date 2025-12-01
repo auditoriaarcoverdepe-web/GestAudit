@@ -31,22 +31,17 @@ const StatCard: React.FC<{ title: string; value: number | string; bgColor: strin
 );
 
 const Dashboard: React.FC<DashboardProps> = ({ audits, findings, recommendations }) => {
-  const currentYear = new Date().getFullYear();
-  const auditsThisYear = audits.filter(a => a.year === currentYear);
-  const auditIdsThisYear = new Set(auditsThisYear.map(a => a.id));
-
-  const findingsThisYear = findings.filter(f => auditIdsThisYear.has(f.auditId));
-  const findingIdsThisYear = new Set(findingsThisYear.map(f => f.id));
-  const recommendationsThisYear = recommendations.filter(r => findingIdsThisYear.has(r.findingId));
   
-  const totalFindingsThisYear = findingsThisYear.length;
-  const pendingRecommendationsThisYear = recommendationsThisYear.filter(r => r.status === RecommendationStatus.PENDING).length;
+  // Calculate stats based on all data provided (already filtered by institution in App.tsx)
+  const totalAudits = audits.length;
+  const totalFindings = findings.length;
+  const pendingRecommendations = recommendations.filter(r => r.status === RecommendationStatus.PENDING).length;
 
   const auditStatusData = Object.values(AuditStatus)
     .filter(s => [AuditStatus.PLANNED, AuditStatus.IN_PROGRESS, AuditStatus.COMPLETED, AuditStatus.POSTPONED].includes(s))
     .map(status => ({
         name: status,
-        value: auditsThisYear.filter(a => a.status === status).length,
+        value: audits.filter(a => a.status === status).length,
     })).filter(d => d.value > 0);
 
   const recommendationStatusData = Object.values(RecommendationStatus)
@@ -80,9 +75,9 @@ const Dashboard: React.FC<DashboardProps> = ({ audits, findings, recommendations
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard title={`Auditorias (${currentYear})`} value={auditsThisYear.length} bgColor="bg-azul-claro" />
-        <StatCard title={`Total de Achados (${currentYear})`} value={totalFindingsThisYear} bgColor="bg-azul-escuro" />
-        <StatCard title={`Recom. Pendentes (${currentYear})`} value={pendingRecommendationsThisYear} bgColor="bg-vermelho-status" />
+        <StatCard title={`Total de Auditorias`} value={totalAudits} bgColor="bg-azul-claro" />
+        <StatCard title={`Total de Achados`} value={totalFindings} bgColor="bg-azul-escuro" />
+        <StatCard title={`Recom. Pendentes`} value={pendingRecommendations} bgColor="bg-vermelho-status" />
         <StatCard title="Planejadas" value={auditStatusData.find(d => d.name === AuditStatus.PLANNED)?.value || 0} bgColor="bg-gray-500" />
         <StatCard title="Em Andamento" value={auditStatusData.find(d => d.name === AuditStatus.IN_PROGRESS)?.value || 0} bgColor="bg-amarelo-status" />
         <StatCard title="Concluídas" value={auditStatusData.find(d => d.name === AuditStatus.COMPLETED)?.value || 0} bgColor="bg-verde-status" />
@@ -90,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ audits, findings, recommendations
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-azul-escuro mb-4">Auditorias por Status ({currentYear})</h2>
+          <h2 className="text-lg font-semibold text-azul-escuro mb-4">Auditorias por Status (Geral)</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={auditStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
