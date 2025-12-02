@@ -71,8 +71,8 @@ e x p o r t   t y p e   J s o n   =
                      a u d i t e d s e c t o r :   s t r i n g   |   n u l l  
                      a u d i t n u m b e r :   s t r i n g  
                      a u d i t o r n o t e s :   s t r i n g   |   n u l l  
-                     c r e a t e d _ a t :   s t r i n g   |   n u l l  
                      c r i t e r i a :   s t r i n g   |   n u l l  
+                     c r e a t e d _ a t :   s t r i n g   |   n u l l  
                      i d :   s t r i n g  
                      i n s t i t u t i o n i d :   s t r i n g  
                      o b j e c t i v e :   s t r i n g   |   n u l l  
@@ -327,7 +327,7 @@ e x p o r t   t y p e   J s o n   =
                      } ,  
                  ]  
              }  
-             c u s t o m _ r e p o r t _ s e c t i o n :   {  
+             c u s t o m _ r e p o r t _ s e c t i o n s :   {  
                  R o w :   {  
                      a u d i t i d :   s t r i n g  
                      c o n t e n t :   s t r i n g  
@@ -452,7 +452,7 @@ e x p o r t   t y p e   J s o n   =
          }  
          ?   U  
          :   n e v e r  
-     :   D e f a u l t S c h e m a T a b l e N a m e O r O p t i o n s   e x t e n d s   k e y o f   D e f a u l t S c h e m a [ " T a b l e s " ]  
+     :   D e f a a u l t S c h e m a T a b l e N a m e O r O p t i o n s   e x t e n d s   k e y o f   D e f a u l t S c h e m a [ " T a b l e s " ]  
          ?   D e f a u l t S c h e m a [ " T a b l e s " ] [ D e f a u l t S c h e m a T a b l e N a m e O r O p t i o n s ]   e x t e n d s   {  
                  U p d a t e :   i n f e r   U  
              }  

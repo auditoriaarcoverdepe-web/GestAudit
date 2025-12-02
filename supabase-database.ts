@@ -10,7 +10,7 @@ type DbRecommendation = Database['public']['Tables']['recommendations']['Row'];
 type DbAuditStage = Database['public']['Tables']['audit_stages']['Row'];
 type DbRisk = Database['public']['Tables']['risks']['Row'];
 type DbProfile = Database['public']['Tables']['profile']['Row'];
-type DbCustomReportSection = Database['public']['Tables']['custom_report_section']['Row'];
+type DbCustomReportSection = Database['public']['Tables']['custom_report_sections']['Row']; // Revertido para plural
 
 export type AppData = {
     institutions: Institution[];
@@ -50,7 +50,7 @@ export const loadAllData = async (): Promise<AppData> => {
       supabase.from('audit_stages').select('*'),
       supabase.from('risks').select('*'),
       supabase.from('profile').select('*').eq('id', 1).single(),
-      supabase.from('custom_report_section').select('*'), // FIX: Use singular table name
+      supabase.from('custom_report_sections').select('*'), // Revertido para plural
     ]);
 
     // Convert database rows to application types
@@ -323,7 +323,7 @@ export const saveAudit = async (auditData: Omit<Audit, 'id'> | Audit, institutio
       objective: row.objective || undefined,
       scope: row.scope || undefined,
       criteria: row.criteria || undefined,
-      auditorNotes: row.auditornotes || undefined,
+      auditorNotes: row.auditorNotes || undefined,
     }));
   } catch (error) {
     console.error('Error saving audit:', error);
@@ -818,7 +818,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
         if ('id' in sectionData) {
             // Update existing section
             const { error } = await supabase
-                .from('custom_report_section') // FIX: Use singular table name
+                .from('custom_report_sections') // Revertido para plural
                 .update({
                     auditid: sectionData.auditId,
                     title: sectionData.title,
@@ -832,7 +832,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
             // Insert new section
             const id = `crs-${Date.now()}`;
             const { error } = await supabase
-                .from('custom_report_section') // FIX: Use singular table name
+                .from('custom_report_sections') // Revertido para plural
                 .insert({
                     id,
                     auditid: sectionData.auditId,
@@ -844,7 +844,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
             if (error) throw error;
         }
 
-        const { data } = await supabase.from('custom_report_section').select('*'); // FIX: Use singular table name
+        const { data } = await supabase.from('custom_report_sections').select('*'); // Revertido para plural
         return (data || []).map(row => ({
             id: row.id,
             auditId: row.auditid,
@@ -861,13 +861,13 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
 export const deleteCustomReportSection = async (sectionId: string): Promise<CustomReportSection[]> => {
     try {
         const { error } = await supabase
-            .from('custom_report_section') // FIX: Use singular table name
+            .from('custom_report_sections') // Revertido para plural
             .delete()
             .eq('id', sectionId);
 
         if (error) throw error;
 
-        const { data } = await supabase.from('custom_report_section').select('*'); // FIX: Use singular table name
+        const { data } = await supabase.from('custom_report_sections').select('*'); // Revertido para plural
         return (data || []).map(row => ({
             id: row.id,
             auditId: row.auditid,
