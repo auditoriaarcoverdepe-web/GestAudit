@@ -351,7 +351,7 @@ const RiskMatrixReport: React.FC<{ year: string; audits: Audit[]; risks: Risk[] 
                                 <td className="p-2 text-gray-600">{risk.controls}</td>
                             </tr>
                         )) : (
-                            <tr><td colSpan={4} className="text-center p-8 text-gray-500">Nenhum risco de prioridade alta ou extrema encontrado para este ano.</p></td></tr>
+                            <tr><td colSpan={4} className="text-center p-8 text-gray-500">Nenhum risco de prioridade alta ou extrema encontrado para este ano.</td></tr>
                         )}
                     </tbody>
                  </table>
