@@ -1,7 +1,7 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './index.css'; // Adicionando a importação do CSS principal
 import './print.css';
 
 const rootElement = document.getElementById('root');
