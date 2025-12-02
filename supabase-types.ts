@@ -327,7 +327,7 @@ e x p o r t   t y p e   J s o n   =
                      } ,  
                  ]  
              }  
-             c u s t o m _ r e p o r t _ s e c t i o n s :   {  
+             c u s t o m _ r e p o r t _ s e c t i o n :   {  
                  R o w :   {  
                      a u d i t i d :   s t r i n g  
                      c o n t e n t :   s t r i n g  

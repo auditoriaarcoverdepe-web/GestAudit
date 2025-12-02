@@ -10,7 +10,7 @@ type DbRecommendation = Database['public']['Tables']['recommendations']['Row'];
 type DbAuditStage = Database['public']['Tables']['audit_stages']['Row'];
 type DbRisk = Database['public']['Tables']['risks']['Row'];
 type DbProfile = Database['public']['Tables']['profile']['Row'];
-type DbCustomReportSection = Database['public']['Tables']['custom_report_sections']['Row'];
+type DbCustomReportSection = Database['public']['Tables']['custom_report_section']['Row'];
 
 export type AppData = {
     institutions: Institution[];
@@ -50,7 +50,7 @@ export const loadAllData = async (): Promise<AppData> => {
       supabase.from('audit_stages').select('*'),
       supabase.from('risks').select('*'),
       supabase.from('profile').select('*').eq('id', 1).single(),
-      supabase.from('custom_report_sections').select('*'), // Fetch custom sections
+      supabase.from('custom_report_section').select('*'), // FIX: Use singular table name
     ]);
 
     // Convert database rows to application types
@@ -818,7 +818,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
         if ('id' in sectionData) {
             // Update existing section
             const { error } = await supabase
-                .from('custom_report_sections')
+                .from('custom_report_section') // FIX: Use singular table name
                 .update({
                     auditid: sectionData.auditId,
                     title: sectionData.title,
@@ -832,7 +832,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
             // Insert new section
             const id = `crs-${Date.now()}`;
             const { error } = await supabase
-                .from('custom_report_sections')
+                .from('custom_report_section') // FIX: Use singular table name
                 .insert({
                     id,
                     auditid: sectionData.auditId,
@@ -844,7 +844,7 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
             if (error) throw error;
         }
 
-        const { data } = await supabase.from('custom_report_sections').select('*');
+        const { data } = await supabase.from('custom_report_section').select('*'); // FIX: Use singular table name
         return (data || []).map(row => ({
             id: row.id,
             auditId: row.auditid,
@@ -861,13 +861,13 @@ export const saveCustomReportSection = async (sectionData: Omit<CustomReportSect
 export const deleteCustomReportSection = async (sectionId: string): Promise<CustomReportSection[]> => {
     try {
         const { error } = await supabase
-            .from('custom_report_sections')
+            .from('custom_report_section') // FIX: Use singular table name
             .delete()
             .eq('id', sectionId);
 
         if (error) throw error;
 
-        const { data } = await supabase.from('custom_report_sections').select('*');
+        const { data } = await supabase.from('custom_report_section').select('*'); // FIX: Use singular table name
         return (data || []).map(row => ({
             id: row.id,
             auditId: row.auditid,
