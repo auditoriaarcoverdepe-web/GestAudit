@@ -13,6 +13,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    // Simulação de autenticação local
     if (username === 'Admin' && password === 'Audit123') {
       setError('');
       onLoginSuccess();
@@ -22,11 +23,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[url('/background_login.jpg')] bg-cover bg-center bg-fixed">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-2xl">
+    <div className="flex items-center justify-center min-h-screen bg-[url('/background_login.jpg')] bg-cover bg-center bg-fixed p-4">
+      {/* Container principal com fundo branco e sombra */}
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-2xl backdrop-blur-sm bg-opacity-95">
         <div className="text-center">
           <img src="/Logo1.png" alt="Logo" className="w-24 h-24 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-azul-escuro">GestAudit</h1>
+          <h1 className="text-3xl font-extrabold text-azul-escuro">GestAudit</h1>
           <p className="mt-2 text-gray-500">Gestão de Auditoria</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
@@ -79,7 +81,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center pt-2">
+            <div className="text-vermelho-status text-sm text-center pt-2 font-medium">
               {error}
             </div>
           )}
@@ -87,7 +89,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-azul-claro hover:bg-azul-escuro focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors mt-6"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-azul-claro hover:bg-azul-escuro focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-azul-claro transition-colors mt-6"
             >
               Entrar
             </button>
