@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Audit, Finding, Recommendation, AuditStatus, RecommendationStatus, Risk, RiskLevel } from '../types';
+import { Audit, Finding, Recommendation, AuditStatus, RecommendationStatus, Risk, RiskLevel, CustomReportSection } from '../types';
 import { ChartPieIcon, PlusCircleIcon, PencilIcon, TrashIcon } from './Icons';
 import { getStatusColor as getAuditStatusColor, getPriorityColor } from './AuditPlan';
 import { getRiskLevelColor } from './RiskMatrix';
-import ReportSectionEditor, { CustomReportSection } from './ReportSectionEditor';
+import ReportSectionEditor from './ReportSectionEditor';
 import RiskMatrixSection from './RiskMatrixSection'; // Importando o novo componente
 
 interface ReportsProps {
@@ -11,6 +11,9 @@ interface ReportsProps {
   findings: Finding[];
   recommendations: Recommendation[];
   risks: Risk[];
+  customReportSections: CustomReportSection[]; // Novo prop: Seções persistidas
+  onSaveCustomSection: (section: Omit<CustomReportSection, 'id'> | CustomReportSection) => Promise<void>; // Novo handler
+  onDeleteCustomSection: (sectionId: string) => Promise<void>; // Novo handler
 }
 
 // --- Helper Functions ---
@@ -36,9 +39,9 @@ interface IndividualReportProps {
     audit: Audit;
     findings: Finding[];
     recommendations: Recommendation[];
-    risks: Risk[]; // Adicionado riscos
-    customSections: CustomReportSection[];
-    includeRiskMatrix: boolean; // Novo prop
+    risks: Risk[]; 
+    customSections: CustomReportSection[]; // Agora são as seções filtradas e persistidas
+    includeRiskMatrix: boolean; 
     onNewSection: () => void;
     onEditSection: (section: CustomReportSection) => void;
     onDeleteSection: (id: string) => void;
@@ -49,6 +52,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
   // Seções automáticas baseadas no planejamento
   const objectiveSection: CustomReportSection = {
       id: 'audit-objective',
+      auditId: audit.id,
       title: 'Objetivo da Auditoria',
       content: audit.objective || 'Não especificado.',
       sequence: 100,
@@ -56,6 +60,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
   
   const scopeSection: CustomReportSection = {
       id: 'audit-scope',
+      auditId: audit.id,
       title: 'Escopo da Auditoria',
       content: audit.scope || 'Não especificado.',
       sequence: 200,
@@ -63,6 +68,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
   
   const criteriaSection: CustomReportSection = {
       id: 'audit-criteria',
+      auditId: audit.id,
       title: 'Critérios e Normas Aplicáveis',
       content: audit.criteria || 'Não especificado.',
       sequence: 300,
@@ -71,6 +77,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
   // Seção da Matriz de Riscos (Automática, opcional)
   const riskMatrixSection: CustomReportSection = {
       id: 'risk-matrix',
+      auditId: audit.id,
       title: 'Matriz de Riscos da Auditoria',
       content: '', 
       sequence: 500, 
@@ -79,6 +86,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
   // Seção de Achados/Recomendações (Core Section)
   const findingSection: CustomReportSection = {
       id: 'findings-recs',
+      auditId: audit.id,
       title: 'Achados e Recomendações',
       content: '', 
       sequence: 999, 
@@ -91,7 +99,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
           objectiveSection,
           scopeSection,
           criteriaSection,
-          ...customSections
+          ...customSections // Seções persistidas
       ];
       
       if (includeRiskMatrix) {
@@ -361,15 +369,14 @@ const RiskMatrixReport: React.FC<{ year: string; audits: Audit[]; risks: Risk[] 
 };
 
 
-const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, risks }) => {
+const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, risks, customReportSections, onSaveCustomSection, onDeleteCustomSection }) => {
   const [reportType, setReportType] = useState('individual');
   const [selectedAuditId, setSelectedAuditId] = useState<string>(audits[0]?.id || '');
   const [selectedYear, setSelectedYear] = useState<string>(String(new Date().getFullYear()));
   
-  // State for custom sections (stored per session, not persisted to DB)
-  const [customSections, setCustomSections] = useState<CustomReportSection[]>([]);
+  // State for managing the editor modal
   const [sectionEditorState, setSectionEditorState] = useState<{ section?: CustomReportSection } | null>(null);
-  const [includeRiskMatrix, setIncludeRiskMatrix] = useState(false); // Novo estado para a Matriz de Riscos
+  const [includeRiskMatrix, setIncludeRiskMatrix] = useState(false); 
 
 
   // FIX: Explicitly type 'a' in map to ensure correct type inference for 'audits'.
@@ -383,32 +390,34 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
   }, [recommendations, selectedAuditFindings]);
   const selectedAuditRisks = useMemo(() => risks.filter(r => r.auditId === selectedAuditId), [risks, selectedAuditId]);
   
-  // Reset custom sections and risk matrix toggle when audit changes
+  // Filter custom sections based on selected audit
+  const currentCustomSections = useMemo(() => customReportSections.filter(s => s.auditId === selectedAuditId), [customReportSections, selectedAuditId]);
+  
+  // Reset risk matrix toggle when audit changes
   React.useEffect(() => {
-      setCustomSections([]);
       setIncludeRiskMatrix(false);
   }, [selectedAuditId]);
 
 
-  const handleSaveSection = (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection) => {
-      if ('id' in sectionData) {
-          // Update
-          setCustomSections(prev => prev.map(s => s.id === sectionData.id ? sectionData : s));
-      } else {
-          // New
-          const newSection: CustomReportSection = {
-              ...sectionData,
-              id: `custom-${Date.now()}`,
-          };
-          setCustomSections(prev => [...prev, newSection]);
+  const handleNewSection = () => {
+      if (!selectedAuditId) {
+          alert('Selecione uma auditoria antes de adicionar uma seção.');
+          return;
       }
+      setSectionEditorState({});
+  };
+  
+  const handleEditSection = (section: CustomReportSection) => {
+      setSectionEditorState({ section });
+  };
+  
+  const handleSaveSection = async (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection) => {
+      await onSaveCustomSection(sectionData);
       setSectionEditorState(null);
   };
   
-  const handleDeleteSection = (id: string) => {
-      if (window.confirm("Tem certeza que deseja excluir esta seção personalizada?")) {
-          setCustomSections(prev => prev.filter(s => s.id !== id));
-      }
+  const handleDeleteSection = async (id: string) => {
+      await onDeleteCustomSection(id);
   };
 
 
@@ -421,11 +430,11 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
                 audit={selectedAudit} 
                 findings={selectedAuditFindings} 
                 recommendations={selectedAuditRecommendations} 
-                risks={selectedAuditRisks} // Passando riscos
-                customSections={customSections}
-                includeRiskMatrix={includeRiskMatrix} // Passando o toggle
-                onNewSection={() => setSectionEditorState({})}
-                onEditSection={(section) => setSectionEditorState({ section })}
+                risks={selectedAuditRisks} 
+                customSections={currentCustomSections} // Passando seções persistidas
+                includeRiskMatrix={includeRiskMatrix} 
+                onNewSection={handleNewSection}
+                onEditSection={handleEditSection}
                 onDeleteSection={handleDeleteSection}
             />
         );
@@ -577,12 +586,13 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
         </div>
       </div>
       
-      {sectionEditorState && (
+      {sectionEditorState && selectedAudit && (
           <ReportSectionEditor
+              auditId={selectedAudit.id}
               section={sectionEditorState.section}
               onSave={handleSaveSection}
               onClose={() => setSectionEditorState(null)}
-              maxSequence={customSections.reduce((max, s) => Math.max(max, s.sequence), 0)}
+              maxSequence={currentCustomSections.reduce((max, s) => Math.max(max, s.sequence), 0)}
           />
       )}
     </div>

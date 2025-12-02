@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
+import { CustomReportSection } from '../types'; // Importando o tipo global
 
-export interface CustomReportSection {
-  id: string;
-  title: string;
-  content: string;
-  sequence: number;
-}
-
-interface ReportSectionEditorProps {
+export interface ReportSectionEditorProps {
+  auditId: string; // Novo prop obrigatório
   section?: CustomReportSection;
   onSave: (section: Omit<CustomReportSection, 'id'> | CustomReportSection) => void;
   onClose: () => void;
   maxSequence: number;
 }
 
-const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ section, onSave, onClose, maxSequence }) => {
-  const [formData, setFormData] = useState<Omit<CustomReportSection, 'id'>>(section || {
+const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ auditId, section, onSave, onClose, maxSequence }) => {
+  const [formData, setFormData] = useState<Omit<CustomReportSection, 'id' | 'auditId'>>(section || {
     title: '',
     content: '',
     sequence: maxSequence + 1,
@@ -24,7 +19,9 @@ const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ section, onSa
 
   useEffect(() => {
     if (section) {
-      setFormData(section);
+      // Ao editar, carregamos os dados existentes, excluindo o auditId e id
+      const { id, auditId, ...rest } = section;
+      setFormData(rest);
     }
   }, [section]);
 
@@ -35,10 +32,15 @@ const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ section, onSa
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const dataToSave = { ...formData, auditId };
+
     if (section) {
-      onSave({ ...section, ...formData });
+      // Update existing section
+      onSave({ ...section, ...dataToSave });
     } else {
-      onSave(formData);
+      // New section
+      onSave(dataToSave as Omit<CustomReportSection, 'id'>);
     }
   };
 

@@ -165,3 +165,12 @@ export interface Risk {
     riskLevel: RiskLevel;
     controls: string; // Existing controls
 }
+
+// --- Custom Report Section Type ---
+export interface CustomReportSection {
+    id: string;
+    auditId: string; // Link to the audit
+    title: string;
+    content: string;
+    sequence: number;
+}

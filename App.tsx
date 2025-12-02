@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Audit, Finding, Recommendation, AuditorProfile, Institution, InstitutionType, AuditStage, Risk } from './types';
+import { Audit, Finding, Recommendation, AuditorProfile, Institution, InstitutionType, AuditStage, Risk, CustomReportSection } from './types';
 import * as db from './supabase-database';
 import { HomeIcon, CalendarIcon, DocumentTextIcon, ChartPieIcon, CogIcon, LogoutIcon, ClipboardListIcon } from './components/Icons';
 import Dashboard from './components/Dashboard';
@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [auditStages, setAuditStages] = useState<AuditStage[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
+  const [customReportSections, setCustomReportSections] = useState<CustomReportSection[]>([]); // New state
   const [profile, setProfile] = useState<AuditorProfile>({name: '', role: '', email: '', signature: ''});
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   
@@ -61,6 +62,7 @@ const App: React.FC = () => {
       setRecommendations(appData.recommendations);
       setAuditStages(appData.auditStages);
       setRisks(appData.risks);
+      setCustomReportSections(appData.customReportSections); // Load custom sections
       setProfile(appData.profile);
       setInstitutions(appData.institutions);
     };
@@ -100,6 +102,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
   };
 
   const handleProfileChange = (newProfile: AuditorProfile) => {
@@ -121,6 +124,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
     
     // FIX: If we were editing an audit, update the selectedAudit state to reflect changes immediately.
     if ('id' in auditData && selectedAudit && auditData.id === selectedAudit.id) {
@@ -136,12 +140,13 @@ const App: React.FC = () => {
 
   const handleDeleteAudit = async (auditId: string) => {
     if (window.confirm("Tem certeza que deseja excluir esta auditoria e todos os seus dados associados (riscos, achados, etc)?")) {
-        const { audits, findings, recommendations, auditStages, risks } = await db.deleteAudit(auditId);
+        const { audits, findings, recommendations, auditStages, risks, customReportSections } = await db.deleteAudit(auditId);
         setAudits(audits);
         setFindings(findings);
         setRecommendations(recommendations);
         setAuditStages(auditStages);
         setRisks(risks);
+        setCustomReportSections(customReportSections);
         setSelectedAudit(null);
     }
   };
@@ -155,6 +160,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
     setIsFindingFormOpen(false);
     setEditingFinding(undefined);
   };
@@ -176,6 +182,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
     setIsRecommendationFormOpen(false);
     setEditingRecommendation(undefined);
   };
@@ -196,6 +203,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
   };
 
   const handleDeleteAuditStage = async (stageId: string) => {
@@ -214,6 +222,7 @@ const App: React.FC = () => {
     setRecommendations(appData.recommendations);
     setAuditStages(appData.auditStages);
     setRisks(appData.risks);
+    setCustomReportSections(appData.customReportSections);
     setIsRiskFormOpen(false);
     setEditingRisk(undefined);
   };
@@ -224,6 +233,19 @@ const App: React.FC = () => {
       setRisks(updatedRisks);
     }
   };
+  
+  const handleSaveCustomReportSection = async (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection) => {
+      const updatedSections = await db.saveCustomReportSection(sectionData);
+      setCustomReportSections(updatedSections);
+  };
+  
+  const handleDeleteCustomReportSection = async (sectionId: string) => {
+      if (window.confirm("Tem certeza que deseja excluir esta seção personalizada?")) {
+          const updatedSections = await db.deleteCustomReportSection(sectionId);
+          setCustomReportSections(updatedSections);
+      }
+  };
+
 
   // --- UI Handlers ---
   const handleSelectAudit = (audit: Audit) => setSelectedAudit(audit);
@@ -273,6 +295,7 @@ const App: React.FC = () => {
   const currentFindingIds = new Set(currentFindings.map(f => f.id));
   const currentRecommendations = recommendations.filter(r => currentFindingIds.has(r.findingId));
   const currentRisks = risks.filter(r => currentAuditIds.has(r.auditId));
+  const currentCustomReportSections = customReportSections.filter(s => currentAuditIds.has(s.auditId));
   const selectedInstitution = institutions.find(i => i.id === selectedInstitutionId);
   
   const getInstitutionDisplayName = (institution?: Institution) => {
@@ -320,7 +343,17 @@ const App: React.FC = () => {
       case 'recommendations':
         return <RecommendationsList recommendations={currentRecommendations} findings={currentFindings} audits={currentAudits} onSelectAudit={handleSelectAudit} onNewRecommendation={handleNewRecommendation} />;
       case 'reports':
-        return <Reports audits={currentAudits} findings={currentFindings} recommendations={currentRecommendations} risks={currentRisks} />;
+        return (
+            <Reports 
+                audits={currentAudits} 
+                findings={currentFindings} 
+                recommendations={currentRecommendations} 
+                risks={currentRisks} 
+                customReportSections={currentCustomReportSections}
+                onSaveCustomSection={handleSaveCustomReportSection}
+                onDeleteCustomSection={handleDeleteCustomReportSection}
+            />
+        );
       case 'settings':
         return <Settings profile={profile} onProfileChange={handleProfileChange} onExportData={exportData} />;
 

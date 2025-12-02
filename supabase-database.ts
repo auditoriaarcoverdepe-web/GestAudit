@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Database } from './supabase-types';
-import { Audit, Finding, Recommendation, AuditorProfile, Institution, InstitutionType, AuditStage, AuditStageStatus, AuditType, AuditStatus, Priority, FindingStatus, RecommendationStatus, Risk, ImpactLevel, ProbabilityLevel, RiskLevel } from './types';
+import { Audit, Finding, Recommendation, AuditorProfile, Institution, InstitutionType, AuditStage, AuditStageStatus, AuditType, AuditStatus, Priority, FindingStatus, RecommendationStatus, Risk, ImpactLevel, ProbabilityLevel, RiskLevel, CustomReportSection } from './types';
 
 // Type aliases for Supabase types
 type DbInstitution = Database['public']['Tables']['institutions']['Row'];
@@ -10,6 +10,7 @@ type DbRecommendation = Database['public']['Tables']['recommendations']['Row'];
 type DbAuditStage = Database['public']['Tables']['audit_stages']['Row'];
 type DbRisk = Database['public']['Tables']['risks']['Row'];
 type DbProfile = Database['public']['Tables']['profile']['Row'];
+type DbCustomReportSection = Database['public']['Tables']['custom_report_sections']['Row'];
 
 export type AppData = {
     institutions: Institution[];
@@ -19,6 +20,7 @@ export type AppData = {
     auditStages: AuditStage[];
     risks: Risk[];
     profile: AuditorProfile;
+    customReportSections: CustomReportSection[]; // Added custom sections
 };
 
 // --- DATABASE INITIALIZATION ---
@@ -38,7 +40,8 @@ export const loadAllData = async (): Promise<AppData> => {
       recommendationsResult,
       auditStagesResult,
       risksResult,
-      profileResult
+      profileResult,
+      customSectionsResult
     ] = await Promise.all([
       supabase.from('institutions').select('*'),
       supabase.from('audits').select('*'),
@@ -46,7 +49,8 @@ export const loadAllData = async (): Promise<AppData> => {
       supabase.from('recommendations').select('*'),
       supabase.from('audit_stages').select('*'),
       supabase.from('risks').select('*'),
-      supabase.from('profile').select('*').eq('id', 1).single()
+      supabase.from('profile').select('*').eq('id', 1).single(),
+      supabase.from('custom_report_sections').select('*'), // Fetch custom sections
     ]);
 
     // Convert database rows to application types
@@ -125,6 +129,14 @@ export const loadAllData = async (): Promise<AppData> => {
       riskLevel: row.risklevel as RiskLevel,
       controls: row.controls,
     }));
+    
+    const customReportSections: CustomReportSection[] = (customSectionsResult.data || []).map(row => ({
+        id: row.id,
+        auditId: row.auditid,
+        title: row.title,
+        content: row.content,
+        sequence: row.sequence,
+    }));
 
     const profile: AuditorProfile = profileResult.data ? {
       name: profileResult.data.name,
@@ -146,6 +158,7 @@ export const loadAllData = async (): Promise<AppData> => {
       auditStages,
       risks,
       profile,
+      customReportSections,
     };
   } catch (error) {
     console.error('Error loading data from Supabase:', error);
@@ -700,7 +713,7 @@ const calculateRiskLevel = (impact: ImpactLevel, probability: ProbabilityLevel):
     return RiskLevel.LOW;
 }
 
-export const saveRisk = async (riskData: Omit<Risk, 'id'> | Risk): Promise<Risk[]> => {
+export const saveRisk = async (riskData: Omit<Risk, 'id' | 'riskLevel'> | Risk): Promise<Risk[]> => {
   try {
     let riskLevel: RiskLevel;
     if ('riskLevel' in riskData) {
@@ -798,6 +811,76 @@ export const deleteRisk = async (riskId: string): Promise<Risk[]> => {
     throw error;
   }
 }
+
+// Custom Report Sections
+export const saveCustomReportSection = async (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection): Promise<CustomReportSection[]> => {
+    try {
+        if ('id' in sectionData) {
+            // Update existing section
+            const { error } = await supabase
+                .from('custom_report_sections')
+                .update({
+                    auditid: sectionData.auditId,
+                    title: sectionData.title,
+                    content: sectionData.content,
+                    sequence: sectionData.sequence,
+                })
+                .eq('id', sectionData.id);
+
+            if (error) throw error;
+        } else {
+            // Insert new section
+            const id = `crs-${Date.now()}`;
+            const { error } = await supabase
+                .from('custom_report_sections')
+                .insert({
+                    id,
+                    auditid: sectionData.auditId,
+                    title: sectionData.title,
+                    content: sectionData.content,
+                    sequence: sectionData.sequence,
+                });
+
+            if (error) throw error;
+        }
+
+        const { data } = await supabase.from('custom_report_sections').select('*');
+        return (data || []).map(row => ({
+            id: row.id,
+            auditId: row.auditid,
+            title: row.title,
+            content: row.content,
+            sequence: row.sequence,
+        }));
+    } catch (error) {
+        console.error('Error saving custom report section:', error);
+        throw error;
+    }
+};
+
+export const deleteCustomReportSection = async (sectionId: string): Promise<CustomReportSection[]> => {
+    try {
+        const { error } = await supabase
+            .from('custom_report_sections')
+            .delete()
+            .eq('id', sectionId);
+
+        if (error) throw error;
+
+        const { data } = await supabase.from('custom_report_sections').select('*');
+        return (data || []).map(row => ({
+            id: row.id,
+            auditId: row.auditid,
+            title: row.title,
+            content: row.content,
+            sequence: row.sequence,
+        }));
+    } catch (error) {
+        console.error('Error deleting custom report section:', error);
+        throw error;
+    }
+};
+
 
 // Data Export
 export const exportData = async () => {
