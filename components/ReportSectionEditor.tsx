@@ -30,17 +30,17 @@ const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ auditId, sect
     setFormData(prev => ({ ...prev, [name]: name === 'sequence' ? parseInt(value, 10) : value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const dataToSave = { ...formData, auditId };
 
     if (section) {
       // Update existing section
-      onSave({ ...section, ...dataToSave });
+      await onSave({ ...section, ...dataToSave });
     } else {
       // New section
-      onSave(dataToSave as Omit<CustomReportSection, 'id'>);
+      await onSave(dataToSave as Omit<CustomReportSection, 'id'>);
     }
   };
 
