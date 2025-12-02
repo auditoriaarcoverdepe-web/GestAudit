@@ -46,6 +46,36 @@ interface IndividualReportProps {
 
 const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, recommendations, risks, customSections, includeRiskMatrix, onNewSection, onEditSection, onDeleteSection }) => {
   
+  // Seções automáticas baseadas no planejamento
+  const objectiveSection: CustomReportSection = {
+      id: 'audit-objective',
+      title: 'Objetivo da Auditoria',
+      content: audit.objective || 'Não especificado.',
+      sequence: 100,
+  };
+  
+  const scopeSection: CustomReportSection = {
+      id: 'audit-scope',
+      title: 'Escopo da Auditoria',
+      content: audit.scope || 'Não especificado.',
+      sequence: 200,
+  };
+  
+  const criteriaSection: CustomReportSection = {
+      id: 'audit-criteria',
+      title: 'Critérios e Normas Aplicáveis',
+      content: audit.criteria || 'Não especificado.',
+      sequence: 300,
+  };
+  
+  // Seção da Matriz de Riscos (Automática, opcional)
+  const riskMatrixSection: CustomReportSection = {
+      id: 'risk-matrix',
+      title: 'Matriz de Riscos da Auditoria',
+      content: '', 
+      sequence: 500, 
+  };
+  
   // Seção de Achados/Recomendações (Core Section)
   const findingSection: CustomReportSection = {
       id: 'findings-recs',
@@ -54,30 +84,28 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
       sequence: 999, 
   };
   
-  // Seção da Matriz de Riscos (Automatic Section)
-  const riskMatrixSection: CustomReportSection = {
-      id: 'risk-matrix',
-      title: 'Matriz de Riscos da Auditoria',
-      content: '', 
-      sequence: 500, // Posição intermediária
-  };
 
-  // Combina seções personalizadas com as seções automáticas
+  // Combina todas as seções
   const allSections = useMemo(() => {
-      let sections: CustomReportSection[] = [...customSections];
+      let sections: CustomReportSection[] = [
+          objectiveSection,
+          scopeSection,
+          criteriaSection,
+          ...customSections
+      ];
       
       if (includeRiskMatrix) {
           sections.push(riskMatrixSection);
       }
       
-      // Adiciona a seção de achados/recomendações se houver dados ou se for a única seção
-      if (findings.length > 0 || sections.length === 0) {
+      // Adiciona a seção de achados/recomendações se houver dados ou se for a única seção restante
+      if (findings.length > 0 || sections.length === 3) { // 3 = objective, scope, criteria
           sections.push(findingSection);
       }
       
-      // Ordena por sequência, garantindo que IDs únicos sejam usados para desempate (embora sequence deva ser único)
+      // Ordena por sequência
       return sections.sort((a, b) => a.sequence - b.sequence);
-  }, [customSections, findings, includeRiskMatrix]);
+  }, [customSections, findings, includeRiskMatrix, audit]);
   
   const renderSectionContent = (section: CustomReportSection) => {
       if (section.id === 'risk-matrix') {
@@ -105,13 +133,15 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
           );
       }
       
-      // Renderiza conteúdo de seção personalizada
+      // Renderiza conteúdo de seção personalizada ou as seções automáticas de planejamento
       return (
           <div className="whitespace-pre-wrap text-gray-700 text-justify">
               {section.content}
           </div>
       );
   }
+
+  const isAutomaticSection = (id: string) => ['audit-objective', 'audit-scope', 'audit-criteria', 'findings-recs', 'risk-matrix'].includes(id);
 
   return (
     <div id="report-content-area">
@@ -125,7 +155,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
             </button>
         </div>
         
-        {/* Audit Header Info - Always rendered first */}
+        {/* Audit Header Info - Simplified, removed Objective/Scope/Criteria */}
         <div className="space-y-4 mb-6 border-b pb-4">
             <h3 className="text-xl font-semibold text-gray-800">{audit.title}</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -134,7 +164,6 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
                 <p><strong>Período Previsto:</strong> {formatDate(audit.plannedStartDate)} - {formatDate(audit.plannedEndDate)}</p>
                 <p><strong>Prioridade:</strong> {audit.priority}</p>
             </div>
-            <p className="text-sm text-justify"><strong>Objetivo:</strong> {audit.objective || 'Não especificado.'}</p>
         </div>
 
         {/* Render all sections in order */}
@@ -144,7 +173,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
                     <h3 className="text-xl font-bold text-gray-800">
                         {index + 1}. {section.title}
                     </h3>
-                    {section.id !== 'findings-recs' && section.id !== 'risk-matrix' && (
+                    {!isAutomaticSection(section.id) && (
                         <div className="flex gap-2 no-print">
                             <button onClick={() => onEditSection(section)} className="text-azul-claro hover:text-azul-escuro" title="Editar Seção"><PencilIcon className="w-4 h-4" /></button>
                             <button onClick={() => onDeleteSection(section.id)} className="text-vermelho-status hover:text-red-700" title="Excluir Seção"><TrashIcon className="w-4 h-4" /></button>
