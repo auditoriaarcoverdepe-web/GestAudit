@@ -4,6 +4,7 @@ import { ChartPieIcon, PlusCircleIcon, PencilIcon, TrashIcon } from './Icons';
 import { getStatusColor as getAuditStatusColor, getPriorityColor } from './AuditPlan';
 import { getRiskLevelColor } from './RiskMatrix';
 import ReportSectionEditor, { CustomReportSection } from './ReportSectionEditor';
+import RiskMatrixSection from './RiskMatrixSection'; // Importando o novo componente
 
 interface ReportsProps {
   audits: Audit[];
@@ -35,36 +36,54 @@ interface IndividualReportProps {
     audit: Audit;
     findings: Finding[];
     recommendations: Recommendation[];
+    risks: Risk[]; // Adicionado riscos
     customSections: CustomReportSection[];
+    includeRiskMatrix: boolean; // Novo prop
     onNewSection: () => void;
     onEditSection: (section: CustomReportSection) => void;
     onDeleteSection: (id: string) => void;
 }
 
-const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, recommendations, customSections, onNewSection, onEditSection, onDeleteSection }) => {
+const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, recommendations, risks, customSections, includeRiskMatrix, onNewSection, onEditSection, onDeleteSection }) => {
   
-  // Estrutura base do relatório, incluindo a seção de Achados/Recomendações
+  // Seção de Achados/Recomendações (Core Section)
   const findingSection: CustomReportSection = {
       id: 'findings-recs',
       title: 'Achados e Recomendações',
-      content: '', // Content is generated dynamically below
-      sequence: 999, // Default sequence for the core section
+      content: '', 
+      sequence: 999, 
+  };
+  
+  // Seção da Matriz de Riscos (Automatic Section)
+  const riskMatrixSection: CustomReportSection = {
+      id: 'risk-matrix',
+      title: 'Matriz de Riscos da Auditoria',
+      content: '', 
+      sequence: 500, // Posição intermediária
   };
 
-  // Combina seções personalizadas com a seção de achados/recomendações
+  // Combina seções personalizadas com as seções automáticas
   const allSections = useMemo(() => {
-      const sections = [...customSections];
+      let sections: CustomReportSection[] = [...customSections];
+      
+      if (includeRiskMatrix) {
+          sections.push(riskMatrixSection);
+      }
       
       // Adiciona a seção de achados/recomendações se houver dados ou se for a única seção
-      if (findings.length > 0 || customSections.length === 0) {
+      if (findings.length > 0 || sections.length === 0) {
           sections.push(findingSection);
       }
       
-      // Ordena por sequência
+      // Ordena por sequência, garantindo que IDs únicos sejam usados para desempate (embora sequence deva ser único)
       return sections.sort((a, b) => a.sequence - b.sequence);
-  }, [customSections, findings]);
+  }, [customSections, findings, includeRiskMatrix]);
   
   const renderSectionContent = (section: CustomReportSection) => {
+      if (section.id === 'risk-matrix') {
+          return <RiskMatrixSection risks={risks} />;
+      }
+      
       if (section.id === 'findings-recs') {
           return (
             <div className="mt-6">
@@ -125,7 +144,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
                     <h3 className="text-xl font-bold text-gray-800">
                         {index + 1}. {section.title}
                     </h3>
-                    {section.id !== 'findings-recs' && (
+                    {section.id !== 'findings-recs' && section.id !== 'risk-matrix' && (
                         <div className="flex gap-2 no-print">
                             <button onClick={() => onEditSection(section)} className="text-azul-claro hover:text-azul-escuro" title="Editar Seção"><PencilIcon className="w-4 h-4" /></button>
                             <button onClick={() => onDeleteSection(section.id)} className="text-vermelho-status hover:text-red-700" title="Excluir Seção"><TrashIcon className="w-4 h-4" /></button>
@@ -315,6 +334,7 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
   // State for custom sections (stored per session, not persisted to DB)
   const [customSections, setCustomSections] = useState<CustomReportSection[]>([]);
   const [sectionEditorState, setSectionEditorState] = useState<{ section?: CustomReportSection } | null>(null);
+  const [includeRiskMatrix, setIncludeRiskMatrix] = useState(false); // Novo estado para a Matriz de Riscos
 
 
   // FIX: Explicitly type 'a' in map to ensure correct type inference for 'audits'.
@@ -326,10 +346,12 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
     const findingIds = selectedAuditFindings.map(f => f.id);
     return recommendations.filter(r => findingIds.includes(r.findingId));
   }, [recommendations, selectedAuditFindings]);
+  const selectedAuditRisks = useMemo(() => risks.filter(r => r.auditId === selectedAuditId), [risks, selectedAuditId]);
   
-  // Reset custom sections when audit changes
+  // Reset custom sections and risk matrix toggle when audit changes
   React.useEffect(() => {
       setCustomSections([]);
+      setIncludeRiskMatrix(false);
   }, [selectedAuditId]);
 
 
@@ -364,7 +386,9 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
                 audit={selectedAudit} 
                 findings={selectedAuditFindings} 
                 recommendations={selectedAuditRecommendations} 
+                risks={selectedAuditRisks} // Passando riscos
                 customSections={customSections}
+                includeRiskMatrix={includeRiskMatrix} // Passando o toggle
                 onNewSection={() => setSectionEditorState({})}
                 onEditSection={(section) => setSectionEditorState({ section })}
                 onDeleteSection={handleDeleteSection}
@@ -497,6 +521,19 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
                 </button>
             </div>
         </div>
+        
+        {reportType === 'individual' && selectedAudit && (
+            <div className="mt-4 pt-4 border-t flex items-center gap-4">
+                <input 
+                    type="checkbox" 
+                    id="includeRiskMatrix" 
+                    checked={includeRiskMatrix} 
+                    onChange={(e) => setIncludeRiskMatrix(e.target.checked)}
+                    className="h-4 w-4 text-azul-claro border-gray-300 rounded focus:ring-azul-claro"
+                />
+                <label htmlFor="includeRiskMatrix" className="text-sm font-medium text-gray-700">Incluir Matriz de Riscos no Relatório</label>
+            </div>
+        )}
       </div>
 
       <div id="report-content-wrapper" className="mt-8">
