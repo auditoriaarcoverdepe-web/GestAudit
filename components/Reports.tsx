@@ -89,12 +89,12 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
             <div className="mt-6">
               {findings.length > 0 ? findings.map(finding => (
                 <div key={finding.id} className="mb-4 border rounded-lg p-4">
-                  <h4 className="font-bold">{finding.findingCode}: {finding.summary}</h4>
+                  <h4 className="font-bold text-justify">{finding.findingCode}: {finding.summary}</h4>
                   <p className="text-xs text-gray-600">Status: {finding.status} | Classificação: {finding.classification}</p>
                   <div className="mt-2 pl-4 border-l-2">
                     {recommendations.filter(r => r.findingId === finding.id).map(rec => (
                       <div key={rec.id} className="text-sm mt-2">
-                        <p><strong>{rec.recommendationCode}:</strong> {rec.description}</p>
+                        <p className="text-justify"><strong>{rec.recommendationCode}:</strong> {rec.description}</p>
                         <p className="text-xs text-gray-500">Prazo: {formatDate(rec.deadline)} | Status: {rec.status} | Responsável: {rec.implementationResponsible}</p>
                       </div>
                     ))}
@@ -107,7 +107,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
       
       // Renderiza conteúdo de seção personalizada
       return (
-          <div className="whitespace-pre-wrap text-gray-700">
+          <div className="whitespace-pre-wrap text-gray-700 text-justify">
               {section.content}
           </div>
       );
@@ -134,7 +134,7 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
                 <p><strong>Período Previsto:</strong> {formatDate(audit.plannedStartDate)} - {formatDate(audit.plannedEndDate)}</p>
                 <p><strong>Prioridade:</strong> {audit.priority}</p>
             </div>
-            <p className="text-sm"><strong>Objetivo:</strong> {audit.objective || 'Não especificado.'}</p>
+            <p className="text-sm text-justify"><strong>Objetivo:</strong> {audit.objective || 'Não especificado.'}</p>
         </div>
 
         {/* Render all sections in order */}

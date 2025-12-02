@@ -104,13 +104,13 @@ const RiskMatrixSection: React.FC<RiskMatrixSectionProps> = ({ risks }) => {
             <tbody>
                 {highPriorityRisks.length > 0 ? highPriorityRisks.map(risk => (
                     <tr key={risk.id} className="border-b">
-                        <td className="p-2">{risk.description}</td>
+                        <td className="p-2 text-justify">{risk.description}</td>
                         <td className="p-2">
                             <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${getRiskLevelColor(risk.riskLevel)}`}>
                                 {risk.riskLevel}
                             </span>
                         </td>
-                        <td className="p-2 text-gray-600">{risk.controls}</td>
+                        <td className="p-2 text-gray-600 text-justify">{risk.controls}</td>
                     </tr>
                 )) : (
                     <tr><td colSpan={3} className="text-center p-4 text-gray-500">Nenhum risco de alta prioridade identificado.</td></tr>
