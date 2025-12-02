@@ -86,23 +86,33 @@ const App: React.FC = () => {
     setSelectedInstitutionId(null);
   };
   const handleAddInstitution = async (municipalityName: string, type: InstitutionType, cnpj: string) => {
-    await db.saveInstitution(municipalityName, type, cnpj);
-    // Reload all data to ensure consistency
-    const appData = await db.loadAllData();
-    setInstitutions(appData.institutions);
+    try {
+        await db.saveInstitution(municipalityName, type, cnpj);
+        // Reload all data to ensure consistency
+        const appData = await db.loadAllData();
+        setInstitutions(appData.institutions);
+    } catch (error) {
+        console.error("Error adding institution:", error);
+        alert(`Erro ao adicionar instituição: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   const handleDeleteInstitution = async (institutionId: string) => {
-    await db.deleteInstitution(institutionId);
-    // Reload all data to ensure consistency
-    const appData = await db.loadAllData();
-    setInstitutions(appData.institutions);
-    setAudits(appData.audits);
-    setFindings(appData.findings);
-    setRecommendations(appData.recommendations);
-    setAuditStages(appData.auditStages);
-    setRisks(appData.risks);
-    setCustomReportSections(appData.customReportSections);
+    try {
+        await db.deleteInstitution(institutionId);
+        // Reload all data to ensure consistency
+        const appData = await db.loadAllData();
+        setInstitutions(appData.institutions);
+        setAudits(appData.audits);
+        setFindings(appData.findings);
+        setRecommendations(appData.recommendations);
+        setAuditStages(appData.auditStages);
+        setRisks(appData.risks);
+        setCustomReportSections(appData.customReportSections);
+    } catch (error) {
+        console.error("Error deleting institution:", error);
+        alert(`Erro ao excluir instituição: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   const handleProfileChange = (newProfile: AuditorProfile) => {
@@ -116,38 +126,48 @@ const App: React.FC = () => {
       alert('Selecione uma instituição antes de cadastrar uma auditoria.');
       return;
     }
-    await db.saveAudit(auditData, selectedInstitutionId);
-    // Reload all data to ensure consistency
-    const appData = await db.loadAllData();
-    setAudits(appData.audits);
-    setFindings(appData.findings);
-    setRecommendations(appData.recommendations);
-    setAuditStages(appData.auditStages);
-    setRisks(appData.risks);
-    setCustomReportSections(appData.customReportSections);
-    
-    // FIX: If we were editing an audit, update the selectedAudit state to reflect changes immediately.
-    if ('id' in auditData && selectedAudit && auditData.id === selectedAudit.id) {
-        const updatedAudit = appData.audits.find(a => a.id === auditData.id);
-        if (updatedAudit) {
-            setSelectedAudit(updatedAudit);
+    try {
+        await db.saveAudit(auditData, selectedInstitutionId);
+        // Reload all data to ensure consistency
+        const appData = await db.loadAllData();
+        setAudits(appData.audits);
+        setFindings(appData.findings);
+        setRecommendations(appData.recommendations);
+        setAuditStages(appData.auditStages);
+        setRisks(appData.risks);
+        setCustomReportSections(appData.customReportSections);
+        
+        // FIX: If we were editing an audit, update the selectedAudit state to reflect changes immediately.
+        if ('id' in auditData && selectedAudit && auditData.id === selectedAudit.id) {
+            const updatedAudit = appData.audits.find(a => a.id === auditData.id);
+            if (updatedAudit) {
+                setSelectedAudit(updatedAudit);
+            }
         }
-    }
 
-    setIsAuditFormOpen(false);
-    setEditingAudit(undefined);
+        setIsAuditFormOpen(false);
+        setEditingAudit(undefined);
+    } catch (error) {
+        console.error("Error saving audit:", error);
+        alert(`Erro ao salvar auditoria: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   const handleDeleteAudit = async (auditId: string) => {
     if (window.confirm("Tem certeza que deseja excluir esta auditoria e todos os seus dados associados (riscos, achados, etc)?")) {
-        const { audits, findings, recommendations, auditStages, risks, customReportSections } = await db.deleteAudit(auditId);
-        setAudits(audits);
-        setFindings(findings);
-        setRecommendations(recommendations);
-        setAuditStages(auditStages);
-        setRisks(risks);
-        setCustomReportSections(customReportSections);
-        setSelectedAudit(null);
+        try {
+            const { audits, findings, recommendations, auditStages, risks, customReportSections } = await db.deleteAudit(auditId);
+            setAudits(audits);
+            setFindings(findings);
+            setRecommendations(recommendations);
+            setAuditStages(auditStages);
+            setRisks(risks);
+            setCustomReportSections(customReportSections);
+            setSelectedAudit(null);
+        } catch (error) {
+            console.error("Error deleting audit:", error);
+            alert(`Erro ao excluir auditoria: ${error instanceof Error ? error.message : String(error)}`);
+        }
     }
   };
   
@@ -235,14 +255,24 @@ const App: React.FC = () => {
   };
   
   const handleSaveCustomReportSection = async (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection) => {
-      const updatedSections = await db.saveCustomReportSection(sectionData);
-      setCustomReportSections(updatedSections);
+      try {
+          const updatedSections = await db.saveCustomReportSection(sectionData);
+          setCustomReportSections(updatedSections);
+      } catch (error) {
+          console.error("Error saving custom report section:", error);
+          alert(`Erro ao salvar seção personalizada: ${error instanceof Error ? error.message : String(error)}`);
+      }
   };
   
   const handleDeleteCustomReportSection = async (sectionId: string) => {
       if (window.confirm("Tem certeza que deseja excluir esta seção personalizada?")) {
-          const updatedSections = await db.deleteCustomReportSection(sectionId);
-          setCustomReportSections(updatedSections);
+          try {
+              const updatedSections = await db.deleteCustomReportSection(sectionId);
+              setCustomReportSections(updatedSections);
+          } catch (error) {
+              console.error("Error deleting custom report section:", error);
+              alert(`Erro ao excluir seção personalizada: ${error instanceof Error ? error.message : String(error)}`);
+          }
       }
   };
 
