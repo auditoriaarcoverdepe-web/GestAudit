@@ -10,6 +10,10 @@ export interface ReportSectionEditorProps {
   maxSequence: number;
 }
 
+const inputClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+const textareaClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+
+
 const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ auditId, section, onSave, onClose, maxSequence }) => {
   const [formData, setFormData] = useState<Omit<CustomReportSection, 'id' | 'auditId'>>(section || {
     title: '',
@@ -49,15 +53,15 @@ const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ auditId, sect
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           <span className="text-gray-700">Título da Seção*</span>
-          <input type="text" name="title" value={formData.title} onChange={handleChange} required className="form-input" />
+          <input type="text" name="title" value={formData.title} onChange={handleChange} required className={inputClasses} />
         </label>
         <label className="block">
           <span className="text-gray-700">Conteúdo*</span>
-          <textarea name="content" value={formData.content} onChange={handleChange} required className="form-textarea" rows={8}></textarea>
+          <textarea name="content" value={formData.content} onChange={handleChange} required className={textareaClasses} rows={8}></textarea>
         </label>
         <label className="block">
           <span className="text-gray-700">Sequência (Ordem de Exibição)*</span>
-          <input type="number" name="sequence" value={formData.sequence} onChange={handleChange} required className="form-input" min="1" />
+          <input type="number" name="sequence" value={formData.sequence} onChange={handleChange} required className={inputClasses} min="1" />
         </label>
 
         <div className="flex justify-end gap-4 pt-4">
@@ -65,21 +69,6 @@ const ReportSectionEditor: React.FC<ReportSectionEditorProps> = ({ auditId, sect
           <button type="submit" className="bg-azul-claro text-white font-bold py-2 px-4 rounded-lg">Salvar Seção</button>
         </div>
       </form>
-      <style>{`
-        .form-input, .form-select, .form-textarea {
-            display: block;
-            width: 100%;
-            margin-top: 0.25rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #D1D5DB;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
-      `}</style>
     </Modal>
   );
 };

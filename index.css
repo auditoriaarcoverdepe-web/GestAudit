@@ -2,7 +2,4 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos globais para inputs de formulário */
-.form-input, .form-select, .form-textarea {
-    @apply block w-full mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm;
-}
+/* Estilos globais para inputs de formulário (Removidos para evitar conflito com Tailwind v4 @apply) */

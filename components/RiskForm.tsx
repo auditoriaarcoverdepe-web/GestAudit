@@ -10,6 +10,11 @@ interface RiskFormProps {
   onClose: () => void;
 }
 
+const inputClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+const textareaClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+const selectClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+
+
 const RiskForm: React.FC<RiskFormProps> = ({ auditId, risk, audits, onSave, onClose }) => {
   const [formData, setFormData] = useState<Omit<Risk, 'id' | 'riskLevel'>>(risk || {
     auditId: auditId || '',
@@ -43,7 +48,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ auditId, risk, audits, onSave, onCl
             value={formData.auditId} 
             onChange={handleChange} 
             required 
-            className="form-select"
+            className={selectClasses}
             disabled={!!auditId}
           >
             <option value="" disabled>Selecione uma auditoria</option>
@@ -53,19 +58,19 @@ const RiskForm: React.FC<RiskFormProps> = ({ auditId, risk, audits, onSave, onCl
         
         <label className="block">
             <span className="text-gray-700">Descrição do Risco*</span>
-            <textarea name="description" value={formData.description} onChange={handleChange} required className="form-textarea" rows={3}></textarea>
+            <textarea name="description" value={formData.description} onChange={handleChange} required className={textareaClasses} rows={3}></textarea>
         </label>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block">
             <span className="text-gray-700">Impacto*</span>
-            <select name="impact" value={formData.impact} onChange={handleChange} required className="form-select">
+            <select name="impact" value={formData.impact} onChange={handleChange} required className={selectClasses}>
               {Object.values(ImpactLevel).map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-gray-700">Probabilidade*</span>
-            <select name="probability" value={formData.probability} onChange={handleChange} required className="form-select">
+            <select name="probability" value={formData.probability} onChange={handleChange} required className={selectClasses}>
               {Object.values(ProbabilityLevel).map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </label>
@@ -73,7 +78,7 @@ const RiskForm: React.FC<RiskFormProps> = ({ auditId, risk, audits, onSave, onCl
         
         <label className="block">
             <span className="text-gray-700">Controles Existentes</span>
-            <textarea name="controls" value={formData.controls} onChange={handleChange} className="form-textarea" rows={3}></textarea>
+            <textarea name="controls" value={formData.controls} onChange={handleChange} className={textareaClasses} rows={3}></textarea>
         </label>
 
         <div className="flex justify-end gap-4 pt-4">
@@ -81,22 +86,6 @@ const RiskForm: React.FC<RiskFormProps> = ({ auditId, risk, audits, onSave, onCl
           <button type="submit" className="bg-azul-claro text-white font-bold py-2 px-4 rounded-lg">Salvar Risco</button>
         </div>
       </form>
-      {/* FIX: Replaced non-standard <style jsx> with a standard <style> tag to resolve the TypeScript compilation error. */}
-      <style>{`
-        .form-input, .form-select, .form-textarea {
-            display: block;
-            width: 100%;
-            margin-top: 0.25rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #D1D5DB;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
-      `}</style>
     </Modal>
   );
 };

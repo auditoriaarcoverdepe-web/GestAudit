@@ -15,6 +15,11 @@ interface FindingFormProps {
   onDeleteRecommendation: (recId: string) => void;
 }
 
+const inputClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+const textareaClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+const selectClasses = "mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-azul-claro focus:border-azul-claro sm:text-sm";
+
+
 const FindingForm: React.FC<FindingFormProps> = (props) => {
   const { auditId, finding, audits, recommendations, onSaveFinding, onClose, onSaveRecommendation, onDeleteRecommendation } = props;
   
@@ -95,7 +100,7 @@ const FindingForm: React.FC<FindingFormProps> = (props) => {
           {!auditId && (
              <label className="block">
                 <span className="text-gray-700">Auditoria*</span>
-                <select name="auditId" value={formData.auditId} onChange={handleChange} required className="form-select">
+                <select name="auditId" value={formData.auditId} onChange={handleChange} required className={selectClasses}>
                     <option value="" disabled>Selecione uma auditoria</option>
                     {audits.map(a => <option key={a.id} value={a.id}>{a.auditNumber} - {a.title}</option>)}
                 </select>
@@ -104,32 +109,32 @@ const FindingForm: React.FC<FindingFormProps> = (props) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="block">
               <span className="text-gray-700">Código do Achado*</span>
-              <input type="text" name="findingCode" value={formData.findingCode} onChange={handleChange} required className="form-input" />
+              <input type="text" name="findingCode" value={formData.findingCode} onChange={handleChange} required className={inputClasses} />
             </label>
             <label className="block">
               <span className="text-gray-700">Resumo do Achado*</span>
-              <input type="text" name="summary" value={formData.summary} onChange={handleChange} required className="form-input" />
+              <input type="text" name="summary" value={formData.summary} onChange={handleChange} required className={inputClasses} />
             </label>
             <label className="block">
               <span className="text-gray-700">Classificação*</span>
-              <select name="classification" value={formData.classification} onChange={handleChange} required className="form-select">
+              <select name="classification" value={formData.classification} onChange={handleChange} required className={selectClasses}>
                 {Object.values(Priority).map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </label>
             <label className="block">
               <span className="text-gray-700">Status*</span>
-              <select name="status" value={formData.status} onChange={handleChange} required className="form-select">
+              <select name="status" value={formData.status} onChange={handleChange} required className={selectClasses}>
                 {Object.values(FindingStatus).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </label>
           </div>
           <label className="block">
             <span className="text-gray-700">Critério Violado*</span>
-            <textarea name="violatedCriteria" value={formData.violatedCriteria} onChange={handleChange} required className="form-textarea" rows={2}></textarea>
+            <textarea name="violatedCriteria" value={formData.violatedCriteria} onChange={handleChange} required className={textareaClasses} rows={2}></textarea>
           </label>
           <label className="block">
             <span className="text-gray-700">Evidência (Descrição)*</span>
-            <textarea name="evidence" value={formData.evidence} onChange={handleChange} required className="form-textarea" rows={3}></textarea>
+            <textarea name="evidence" value={formData.evidence} onChange={handleChange} required className={textareaClasses} rows={3}></textarea>
           </label>
 
            {/* New Attachment Section */}
@@ -156,11 +161,11 @@ const FindingForm: React.FC<FindingFormProps> = (props) => {
 
           <label className="block">
             <span className="text-gray-700">Causa</span>
-            <textarea name="cause" value={formData.cause} onChange={handleChange} className="form-textarea" rows={2}></textarea>
+            <textarea name="cause" value={formData.cause} onChange={handleChange} className={textareaClasses} rows={2}></textarea>
           </label>
           <label className="block">
             <span className="text-gray-700">Efeito / Risco</span>
-            <textarea name="effect" value={formData.effect} onChange={handleChange} className="form-textarea" rows={2}></textarea>
+            <textarea name="effect" value={formData.effect} onChange={handleChange} className={textareaClasses} rows={2}></textarea>
           </label>
           
           {/* Recommendations Section */}
@@ -206,23 +211,6 @@ const FindingForm: React.FC<FindingFormProps> = (props) => {
           audits={[]}
         />
       )}
-      
-      {/* FIX: Replaced non-standard <style jsx> with a standard <style> tag to resolve the TypeScript compilation error. */}
-       <style>{`
-        .form-input, .form-select, .form-textarea {
-            display: block;
-            width: 100%;
-            margin-top: 0.25rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #D1D5DB;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
-      `}</style>
     </>
   );
 };
