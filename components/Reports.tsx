@@ -145,6 +145,12 @@ const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, re
 
   return (
     <div id="report-content-area">
+        {/* Título principal visível apenas na impressão, centralizado e em preto */}
+        <div className="hidden print:block text-center mb-6">
+            <h2 className="text-2xl font-bold text-black">Relatório de Auditoria: {audit.auditNumber}</h2>
+        </div>
+        
+        {/* Título principal visível apenas na tela, com botões de edição */}
         <div className="flex justify-between items-start mb-4 no-print">
             <h2 className="text-2xl font-bold text-azul-escuro">Relatório de Auditoria: {audit.auditNumber}</h2>
             <button 
@@ -345,7 +351,7 @@ const RiskMatrixReport: React.FC<{ year: string; audits: Audit[]; risks: Risk[] 
                                 <td className="p-2 text-gray-600">{risk.controls}</td>
                             </tr>
                         )) : (
-                            <tr><td colSpan={4} className="text-center p-8 text-gray-500">Nenhum risco de prioridade alta ou extrema encontrado para este ano.</td></tr>
+                            <tr><td colSpan={4} className="text-center p-8 text-gray-500">Nenhum risco de prioridade alta ou extrema encontrado para este ano.</p></td></tr>
                         )}
                     </tbody>
                  </table>
