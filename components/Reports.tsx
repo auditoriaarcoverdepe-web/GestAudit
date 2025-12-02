@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Audit, Finding, Recommendation, AuditStatus, RecommendationStatus, Risk, RiskLevel } from '../types';
-import { ChartPieIcon } from './Icons';
+import { ChartPieIcon, PlusCircleIcon, PencilIcon, TrashIcon } from './Icons';
 import { getStatusColor as getAuditStatusColor, getPriorityColor } from './AuditPlan';
 import { getRiskLevelColor } from './RiskMatrix';
-// ...existing code...
+import ReportSectionEditor, { CustomReportSection } from './ReportSectionEditor';
 
 interface ReportsProps {
   audits: Audit[];
@@ -31,38 +31,114 @@ const formatDate = (dateString?: string) => dateString ? new Date(dateString).to
 
 // --- Sub-components for each report type ---
 
-const IndividualReport: React.FC<{ audit: Audit; findings: Finding[]; recommendations: Recommendation[] }> = ({ audit, findings, recommendations }) => (
-  <div>
-    <h2 className="text-2xl font-bold text-azul-escuro border-b pb-2 mb-4">Relatório de Auditoria: {audit.auditNumber}</h2>
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold text-gray-800">{audit.title}</h3>
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <p><strong>Setor Auditado:</strong> {audit.auditedSector}</p>
-        <p><strong>Status:</strong> {audit.status}</p>
-        <p><strong>Período Previsto:</strong> {formatDate(audit.plannedStartDate)} - {formatDate(audit.plannedEndDate)}</p>
-        <p><strong>Prioridade:</strong> {audit.priority}</p>
-      </div>
-      <p className="text-sm"><strong>Objetivo:</strong> {audit.objective || 'Não especificado.'}</p>
-    </div>
-    <div className="mt-6">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Achados e Recomendações</h3>
-      {findings.length > 0 ? findings.map(finding => (
-        <div key={finding.id} className="mb-4 border rounded-lg p-4">
-          <h4 className="font-bold">{finding.findingCode}: {finding.summary}</h4>
-          <p className="text-xs text-gray-600">Status: {finding.status} | Classificação: {finding.classification}</p>
-          <div className="mt-2 pl-4 border-l-2">
-            {recommendations.filter(r => r.findingId === finding.id).map(rec => (
-              <div key={rec.id} className="text-sm mt-2">
-                <p><strong>{rec.recommendationCode}:</strong> {rec.description}</p>
-                <p className="text-xs text-gray-500">Prazo: {formatDate(rec.deadline)} | Status: {rec.status} | Responsável: {rec.implementationResponsible}</p>
-              </div>
-            ))}
+interface IndividualReportProps {
+    audit: Audit;
+    findings: Finding[];
+    recommendations: Recommendation[];
+    customSections: CustomReportSection[];
+    onNewSection: () => void;
+    onEditSection: (section: CustomReportSection) => void;
+    onDeleteSection: (id: string) => void;
+}
+
+const IndividualReport: React.FC<IndividualReportProps> = ({ audit, findings, recommendations, customSections, onNewSection, onEditSection, onDeleteSection }) => {
+  
+  // Estrutura base do relatório, incluindo a seção de Achados/Recomendações
+  const findingSection: CustomReportSection = {
+      id: 'findings-recs',
+      title: 'Achados e Recomendações',
+      content: '', // Content is generated dynamically below
+      sequence: 999, // Default sequence for the core section
+  };
+
+  // Combina seções personalizadas com a seção de achados/recomendações
+  const allSections = useMemo(() => {
+      const sections = [...customSections];
+      
+      // Adiciona a seção de achados/recomendações se houver dados ou se for a única seção
+      if (findings.length > 0 || customSections.length === 0) {
+          sections.push(findingSection);
+      }
+      
+      // Ordena por sequência
+      return sections.sort((a, b) => a.sequence - b.sequence);
+  }, [customSections, findings]);
+  
+  const renderSectionContent = (section: CustomReportSection) => {
+      if (section.id === 'findings-recs') {
+          return (
+            <div className="mt-6">
+              {findings.length > 0 ? findings.map(finding => (
+                <div key={finding.id} className="mb-4 border rounded-lg p-4">
+                  <h4 className="font-bold">{finding.findingCode}: {finding.summary}</h4>
+                  <p className="text-xs text-gray-600">Status: {finding.status} | Classificação: {finding.classification}</p>
+                  <div className="mt-2 pl-4 border-l-2">
+                    {recommendations.filter(r => r.findingId === finding.id).map(rec => (
+                      <div key={rec.id} className="text-sm mt-2">
+                        <p><strong>{rec.recommendationCode}:</strong> {rec.description}</p>
+                        <p className="text-xs text-gray-500">Prazo: {formatDate(rec.deadline)} | Status: {rec.status} | Responsável: {rec.implementationResponsible}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )) : <p className="text-gray-500">Nenhum achado registrado para esta auditoria.</p>}
+            </div>
+          );
+      }
+      
+      // Renderiza conteúdo de seção personalizada
+      return (
+          <div className="whitespace-pre-wrap text-gray-700">
+              {section.content}
           </div>
+      );
+  }
+
+  return (
+    <div id="report-content-area">
+        <div className="flex justify-between items-start mb-4 no-print">
+            <h2 className="text-2xl font-bold text-azul-escuro">Relatório de Auditoria: {audit.auditNumber}</h2>
+            <button 
+                onClick={onNewSection} 
+                className="flex items-center gap-1 bg-azul-claro text-white font-bold py-1 px-3 text-sm rounded-lg shadow hover:bg-azul-escuro transition duration-300"
+            >
+                <PlusCircleIcon className="w-4 h-4" /> Nova Seção
+            </button>
         </div>
-      )) : <p className="text-gray-500">Nenhum achado para esta auditoria.</p>}
+        
+        {/* Audit Header Info - Always rendered first */}
+        <div className="space-y-4 mb-6 border-b pb-4">
+            <h3 className="text-xl font-semibold text-gray-800">{audit.title}</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+                <p><strong>Setor Auditado:</strong> {audit.auditedSector}</p>
+                <p><strong>Status:</strong> {audit.status}</p>
+                <p><strong>Período Previsto:</strong> {formatDate(audit.plannedStartDate)} - {formatDate(audit.plannedEndDate)}</p>
+                <p><strong>Prioridade:</strong> {audit.priority}</p>
+            </div>
+            <p className="text-sm"><strong>Objetivo:</strong> {audit.objective || 'Não especificado.'}</p>
+        </div>
+
+        {/* Render all sections in order */}
+        {allSections.map((section, index) => (
+            <div key={section.id} className="mb-6 pt-4 border-t">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-xl font-bold text-gray-800">
+                        {index + 1}. {section.title}
+                    </h3>
+                    {section.id !== 'findings-recs' && (
+                        <div className="flex gap-2 no-print">
+                            <button onClick={() => onEditSection(section)} className="text-azul-claro hover:text-azul-escuro" title="Editar Seção"><PencilIcon className="w-4 h-4" /></button>
+                            <button onClick={() => onDeleteSection(section.id)} className="text-vermelho-status hover:text-red-700" title="Excluir Seção"><TrashIcon className="w-4 h-4" /></button>
+                        </div>
+                    )}
+                </div>
+                {renderSectionContent(section)}
+            </div>
+        ))}
+        
     </div>
-  </div>
-);
+  );
+};
 
 const AnnualReport: React.FC<{ year: string; audits: Audit[]; findings: Finding[]; recommendations: Recommendation[] }> = ({ year, audits, findings, recommendations }) => {
     // FIX: Add explicit type annotation for 'a' to prevent type inference issues.
@@ -235,6 +311,11 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
   const [reportType, setReportType] = useState('individual');
   const [selectedAuditId, setSelectedAuditId] = useState<string>(audits[0]?.id || '');
   const [selectedYear, setSelectedYear] = useState<string>(String(new Date().getFullYear()));
+  
+  // State for custom sections (stored per session, not persisted to DB)
+  const [customSections, setCustomSections] = useState<CustomReportSection[]>([]);
+  const [sectionEditorState, setSectionEditorState] = useState<{ section?: CustomReportSection } | null>(null);
+
 
   // FIX: Explicitly type 'a' in map to ensure correct type inference for 'audits'.
   const years = useMemo(() => [...new Set(audits.map((a: Audit) => a.year))].sort((a: number, b: number) => b-a), [audits]);
@@ -245,13 +326,50 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
     const findingIds = selectedAuditFindings.map(f => f.id);
     return recommendations.filter(r => findingIds.includes(r.findingId));
   }, [recommendations, selectedAuditFindings]);
+  
+  // Reset custom sections when audit changes
+  React.useEffect(() => {
+      setCustomSections([]);
+  }, [selectedAuditId]);
+
+
+  const handleSaveSection = (sectionData: Omit<CustomReportSection, 'id'> | CustomReportSection) => {
+      if ('id' in sectionData) {
+          // Update
+          setCustomSections(prev => prev.map(s => s.id === sectionData.id ? sectionData : s));
+      } else {
+          // New
+          const newSection: CustomReportSection = {
+              ...sectionData,
+              id: `custom-${Date.now()}`,
+          };
+          setCustomSections(prev => [...prev, newSection]);
+      }
+      setSectionEditorState(null);
+  };
+  
+  const handleDeleteSection = (id: string) => {
+      if (window.confirm("Tem certeza que deseja excluir esta seção personalizada?")) {
+          setCustomSections(prev => prev.filter(s => s.id !== id));
+      }
+  };
 
 
   const renderReportContent = () => {
     switch (reportType) {
       case 'individual':
         if (!selectedAudit) return <p className="text-center text-gray-500 p-8">Por favor, selecione uma auditoria para gerar o relatório.</p>;
-        return <IndividualReport audit={selectedAudit} findings={selectedAuditFindings} recommendations={selectedAuditRecommendations} />;
+        return (
+            <IndividualReport 
+                audit={selectedAudit} 
+                findings={selectedAuditFindings} 
+                recommendations={selectedAuditRecommendations} 
+                customSections={customSections}
+                onNewSection={() => setSectionEditorState({})}
+                onEditSection={(section) => setSectionEditorState({ section })}
+                onDeleteSection={handleDeleteSection}
+            />
+        );
       case 'annual':
         return <AnnualReport year={selectedYear} audits={audits} findings={findings} recommendations={recommendations} />;
       case 'plan':
@@ -386,6 +504,15 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
             {renderReportContent()}
         </div>
       </div>
+      
+      {sectionEditorState && (
+          <ReportSectionEditor
+              section={sectionEditorState.section}
+              onSave={handleSaveSection}
+              onClose={() => setSectionEditorState(null)}
+              maxSequence={customSections.reduce((max, s) => Math.max(max, s.sequence), 0)}
+          />
+      )}
     </div>
   );
 };
