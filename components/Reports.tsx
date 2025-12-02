@@ -71,6 +71,9 @@ const AnnualReport: React.FC<{ year: string; audits: Audit[]; findings: Finding[
     const yearFindings = findings.filter(f => auditIds.includes(f.auditId));
     const findingIds = yearFindings.map(f => f.id);
     const yearRecommendations = recommendations.filter(r => findingIds.includes(r.findingId));
+    
+    const verifiedRecommendations = yearRecommendations.filter(r => r.status === RecommendationStatus.VERIFIED).length;
+
 
     const statusCounts = yearAudits.reduce((acc, audit) => {
         acc[audit.status] = (acc[audit.status] || 0) + 1;
@@ -97,6 +100,10 @@ const AnnualReport: React.FC<{ year: string; audits: Audit[]; findings: Finding[
              <div className="p-4 bg-cinza-claro rounded-lg text-center">
                 <span className="text-3xl font-bold text-azul-escuro">{yearRecommendations.length}</span>
                 <p className="text-sm text-gray-600">Recomendações</p>
+            </div>
+            <div className="p-4 bg-cinza-claro rounded-lg text-center">
+                <span className="text-3xl font-bold text-verde-status">{verifiedRecommendations}</span>
+                <p className="text-sm text-gray-600">Recom. Verificadas</p>
             </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -284,6 +291,11 @@ const Reports: React.FC<ReportsProps> = ({ audits, findings, recommendations, ri
         });
     } else if (reportType === 'annual' || reportType === 'plan') {
         fileName = `relatorio_anual_${selectedYear}.csv`;
+        
+        // Add headers for Annual/Plan Report
+        const headers = ["Year", "AuditNumber", "Title", "Type", "Status", "Priority", "PlannedStart", "PlannedEnd", "TotalFindings", "TotalRecommendations"];
+        csvContent += headers.join(',') + '\r\n';
+        
         audits.filter((a: Audit) => a.year.toString() === selectedYear).forEach((a: Audit) => {
             const auditFindings = findings.filter(f => f.auditId === a.id);
             const findingIds = auditFindings.map(f => f.id);
