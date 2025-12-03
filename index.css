@@ -1,5 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+    --color-azul-escuro: #1E3A8A;
+    --color-azul-claro: #3B82F6;
+    --color-cinza-claro: #F3F4F6;
+    --color-verde-status: #10B981;
+    --color-vermelho-status: #EF4444;
+    --color-amarelo-status: #F59E0B;
+    --font-sans: Inter, sans-serif;
+}
 
 /* Estilos globais para inputs de formulário (Removidos para evitar conflito com Tailwind v4 @apply) */
