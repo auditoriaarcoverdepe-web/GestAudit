@@ -1,32 +1,52 @@
 /* Estilos para impressão da Matriz de Riscos */
 @media print {
+
+  /* Margens padrão ABNT para relatórios */
+  @page {
+    margin: 3cm 2cm 2cm 3cm;
+    /* superior, direita, inferior, esquerda */
+    size: A4;
+  }
+
   body {
     background: white !important;
     color: black !important;
+    padding-top: 0 !important;
   }
+
+
+
+
+
   .bg-red-700 {
     background-color: #b91c1c !important;
     color: #fff !important;
   }
+
   .bg-vermelho-status {
     background-color: #ef4444 !important;
     color: #fff !important;
   }
+
   .bg-amarelo-status {
     background-color: #facc15 !important;
     color: #000 !important;
   }
+
   .bg-verde-status {
     background-color: #22c55e !important;
     color: #fff !important;
   }
+
   .bg-gray-400 {
     background-color: #9ca3af !important;
     color: #fff !important;
   }
+
   .no-print {
     display: none !important;
   }
+
   #printable-matrix-area {
     box-shadow: none !important;
     border: none !important;

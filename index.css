@@ -11,3 +11,8 @@
 }
 
 /* Estilos globais para inputs de formulário (Removidos para evitar conflito com Tailwind v4 @apply) */
+
+/* Ocultar cabeçalho de impressão na tela */
+#print-header {
+    display: none;
+}

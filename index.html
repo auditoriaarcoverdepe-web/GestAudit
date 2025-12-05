@@ -1,91 +1,101 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GestAudit - Gestão de Auditoria</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-      @media print {
-        /* Hide elements that should not be printed */
-        .no-print, #modal-root {
-          display: none !important;
-        }
 
-        /* Reset the main layout to be print-friendly */
-        body, #root, .app-container {
-          display: block !important;
-          height: auto !important;
-          overflow: visible !important;
-          background: white !important;
-        }
-        
-        /* Ensure the main content area expands */
-        .main-content {
-          display: block !important;
-          height: auto !important;
-          overflow: visible !important;
-          width: 100% !important; /* Ensure it takes full width */
-          flex: none !important; /* Remove flex properties */
-          padding: 0 !important;
-          margin: 0 !important;
-        }
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GestAudit - Gestão de Auditoria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    @media print {
 
-        /* Reset padding on the view container */
-        .main-content > div {
-            padding: 0 !important;
-        }
-        
-        /* Center the report on the page and remove screen-specific styling */
-        #report-content-wrapper {
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        
-        #report-content {
-          box-shadow: none !important;
-          border: none !important;
-          border-radius: 0 !important;
-          padding: 0 !important;
-        }
-        
-        /* Center the main report title */
-        #report-content > div > h2:first-child {
-            text-align: center !important;
-        }
-
-        /* Styles for printing the Risk Matrix */
-        #printable-matrix-area {
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        #printable-matrix-area > div { /* Target the inner div with shadow/padding */
-          box-shadow: none !important;
-          border: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        
-        #printable-matrix-area table {
-          min-width: 100% !important; /* Override screen min-width */
-          width: 100% !important;
-          table-layout: fixed;
-          page-break-inside: avoid;
-        }
-        
-        #printable-matrix-area table td {
-            transform: none !important; /* Disable hover scale effect */
-        }
-
-        @page {
-          size: landscape;
-          margin: 1in;
-        }
+      /* Hide elements that should not be printed */
+      .no-print,
+      #modal-root {
+        display: none !important;
       }
-    </style>
+
+      /* Reset the main layout to be print-friendly */
+      body,
+      #root,
+      .app-container {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
+      }
+
+      /* Ensure the main content area expands */
+      .main-content {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        width: 100% !important;
+        /* Ensure it takes full width */
+        flex: none !important;
+        /* Remove flex properties */
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Reset padding on the view container */
+      .main-content>div {
+        padding: 0 !important;
+      }
+
+      /* Center the report on the page and remove screen-specific styling */
+      #report-content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #report-content {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Center the main report title */
+      #report-content>div>h2:first-child {
+        text-align: center !important;
+      }
+
+      /* Styles for printing the Risk Matrix */
+      #printable-matrix-area {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #printable-matrix-area>div {
+        /* Target the inner div with shadow/padding */
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #printable-matrix-area table {
+        min-width: 100% !important;
+        /* Override screen min-width */
+        width: 100% !important;
+        table-layout: fixed;
+        page-break-inside: avoid;
+      }
+
+      #printable-matrix-area table td {
+        transform: none !important;
+        /* Disable hover scale effect */
+      }
+
+
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -100,9 +110,12 @@
 </script>
 
 </head>
-  <body>
-    <div id="root"></div>
-    <div id="modal-root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body>
+
+  <div id="root"></div>
+  <div id="modal-root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
